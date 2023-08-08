@@ -6,9 +6,10 @@ from .models import *
 
 class UserDetailsSerializer(serializers.ModelSerializer):
 
-    username = serializers.CharField()
-    email = serializers.EmailField()
+    # username = serializers.CharField()
+    email = serializers.CharField()
     phonenumber = serializers.CharField()
+    password = serializers.CharField()
 
     class Meta:
         model = UserDetails
@@ -48,6 +49,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     def validate(self,data):
         email = data.get('email')
         phonenumber = data.get('phonenumber')
+        password = data.get('password')
 
 
         if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|in)$', email):
@@ -55,6 +57,10 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
         if not re.match(r'^\d{10}$', phonenumber):
             raise serializers.ValidationError("Invalid phone number format. Please enter a 10-digit number.")
+        
+        if not re.match(r'^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$',password):
+            raise serializers.ValidationError("It must contain at least one uppercase letter, one lowercase letter, one digit, and one special character and lenght should be 8")
+
 
         return data
 
