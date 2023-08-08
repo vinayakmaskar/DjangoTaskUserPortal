@@ -13,6 +13,8 @@ from rest_framework.decorators import api_view
 
 
 
+
+
 class UserActions(APIView):
 
     def post(self,request):
@@ -22,15 +24,16 @@ class UserActions(APIView):
             serializer = UserDetailsSerializer(data = request.data)
 
             if serializer.is_valid():
+                # print(serializer.data)  // cant write this before serializer.save() instead serializer.validated_data
                 hash_password = make_password(serializer.validated_data.get('password'))
                 serializer.validated_data['password'] = hash_password
                 serializer.save()
-                return JsonResponse({'msg':'Registered Successfully'})
+                return JsonResponse({'msg':'Registered Successfully','data' : serializer.data},status=201)
                 
-            return JsonResponse({'msg':serializer.errors})
+            return JsonResponse({'msg':serializer.errors}, status = 400)
             
         except Exception as e:
-            return JsonResponse({'msg':str(e)})
+            return JsonResponse({'msg':str(e)}, status = 500)
         
 
 
@@ -38,25 +41,37 @@ class UserActions(APIView):
 def post_login_details(request):
 
         try:
-            print(request.data)
 
-            # hash_password = make_password(request.data.get('password'))
-            # print(hash_password)
-
-            user = UserDetails.objects.filter(email = request.data.get('email')).first()
-            print(user)
-
-            if user is not None:
-                 if check_password(request.data.get('password'),user.password):
-                      return JsonResponse({'msg':'logged in successfully'})
-                 
-                 return JsonResponse({'msg':'Invalid password'})
+            if request.data.get("email") is None or  not request.data.get("email").strip():
+                 return JsonResponse({'msg':'email required'})
             
-            return JsonResponse({'msg':'Invalid credentials'})
+            if request.data.get("password") is None or not request.data.get("password").strip():
+                 return JsonResponse({'msg':'Password required'})
+            
+
+            serializer = UserDetailsSerializer(data =request.data, partial = True)
+
+            if serializer.is_valid():
+                    
+
+                print(request.data)
+                user = UserDetails.objects.filter(email = request.data.get('email')).first()
+                print(user)
+
+                if user is not None:
+                    if check_password(request.data.get('password'),user.password):
+                        return JsonResponse({'msg':'logged in successfully'})
+                    
+                    return JsonResponse({'msg':'Invalid password'})
+                
+                return JsonResponse({'msg':'Invalid email'})
+            
+            return JsonResponse({'msg':serializer.errors})
         
         except Exception as e:
-             return JsonResponse({'msg':str(e)})
-            
+                # print("hell")
+                return JsonResponse({'msg':str(e)})
+                
 
 
 
