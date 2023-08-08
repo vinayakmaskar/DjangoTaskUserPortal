@@ -6,12 +6,13 @@ from django.contrib.auth.models import AbstractUser
 
 class UserDetails(AbstractUser):
 
-    username = models.CharField(max_length=150, unique=True,null = False)
-    email = models.EmailField(unique=True,null = False)
-    password = models.CharField(max_length=10,null = False) 
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(unique=True)
+    password = models.CharField() 
+    phonenumber = models.CharField(max_length = 10,unique=True)
 
-    USERNAME_FIELD = 'email'   #doing authentication using email...because it by default does by username
-    REQUIRED_FIELDS = ['username']
+    # USERNAME_FIELD = 'email'   #doing authentication using email...because it by default does by username
+    # REQUIRED_FIELDS = ['username']
 
     is_staff = None
     is_active = None
